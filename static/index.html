@@ -6,16 +6,17 @@
     <title>AI & Automation Model Interface</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
+            --bg: #090d16;
+            --card-bg: #131c2e;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --text: #f8fafc;
             --text-dim: #94a3b8;
-            --border: #334155;
+            --border: #23314d;
             --user-bubble: #2563eb;
-            --bot-bubble: #1e293b;
+            --bot-bubble: #162035;
         }
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
@@ -27,7 +28,7 @@
         }
         header {
             background-color: #0b1120;
-            padding: 16px 24px;
+            padding: 12px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -35,7 +36,7 @@
         }
         header h1 {
             margin: 0;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -48,16 +49,33 @@
             display: inline-block;
             box-shadow: 0 0 8px #10b981;
         }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn-settings {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-settings:hover {
+            background-color: #334155;
+        }
         .container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 800px;
+            max-width: 850px;
             width: 100%;
             margin: 0 auto;
             overflow: hidden;
             padding: 16px;
-            box-sizing: border-box;
         }
         .chat-box {
             flex: 1;
@@ -68,16 +86,17 @@
             padding-right: 8px;
         }
         .message {
-            max-width: 80%;
+            max-width: 82%;
             padding: 12px 16px;
             border-radius: 12px;
             line-height: 1.5;
             font-size: 0.95rem;
             word-wrap: break-word;
+            white-space: pre-wrap;
         }
         .message.bot {
             align-self: flex-start;
-            background-color: var(--bot-bg, #1e293b);
+            background-color: var(--bot-bubble);
             border: 1px solid var(--border);
         }
         .message.user {
@@ -88,22 +107,22 @@
         .input-bar {
             display: flex;
             gap: 10px;
-            padding-top: 16px;
+            padding-top: 14px;
         }
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 16px;
+        input[type="text"], select, textarea {
+            padding: 12px 14px;
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
+            width: 100%;
         }
-        input[type="text"]:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: var(--primary);
         }
-        button {
+        button.btn-send {
             padding: 12px 24px;
             background-color: var(--primary);
             color: #fff;
@@ -114,37 +133,206 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        button:hover {
+        button.btn-send:hover {
             background-color: var(--primary-hover);
+        }
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal {
+            background: #111827;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-width: 520px;
+            width: 90%;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+        }
+        .modal h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-cancel {
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1><span class="status-badge"></span> 24/7 Model & Service Interface</h1>
-        <span style="font-size: 0.85rem; color: var(--text-dim);" id="host-label">Connecting...</span>
+        <h1><span class="status-badge"></span> Always-On Model Service</h1>
+        <div class="header-actions">
+            <span id="active-model-pill" style="font-size: 0.85rem; color: #38bdf8; background: #0c4a6e; padding: 4px 10px; border-radius: 12px;">Loading...</span>
+            <button class="btn-settings" onclick="openModal()">⚙️ Model Settings</button>
+        </div>
     </header>
 
     <div class="container">
         <div class="chat-box" id="chat">
-            <div class="message bot">
-                👋 Hello! This is your 24/7 live service interface running in the cloud and local network. Send a prompt or command below to interact with it.
-            </div>
+            <div class="message bot">👋 Hello! Your 24/7 inference service is running. Click <b>⚙️ Model Settings</b> at the top right to configure your provider (OpenRouter, OpenAI, Groq, Anthropic, or custom endpoints) and enter your API key.</div>
         </div>
 
         <form class="input-bar" id="chat-form">
-            <input type="text" id="user-input" placeholder="Type a message or instruction..." autocomplete="off" required>
-            <button type="submit">Send</button>
+            <input type="text" id="user-input" placeholder="Type an instruction or prompt..." autocomplete="off" required>
+            <button type="submit" class="btn-send">Send</button>
         </form>
     </div>
 
-    <script>
-        const hostLabel = document.getElementById('host-label');
-        hostLabel.textContent = window.location.origin;
+    <!-- Modal for Provider & Model Settings -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <h2>⚙️ Inference Provider Configuration</h2>
 
+            <div class="form-group">
+                <label>Provider Preset</label>
+                <select id="preset-select" onchange="applyPreset()">
+                    <option value="openrouter">OpenRouter (Supports Gemini, Claude, Llama, DeepSeek, etc.)</option>
+                    <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                    <option value="groq">Groq (Ultra-fast Llama 3, Mixtral)</option>
+                    <option value="custom">Custom OpenAI-Compatible API</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>API Base URL</label>
+                <input type="text" id="setting-base-url" placeholder="https://openrouter.ai/api/v1">
+            </div>
+
+            <div class="form-group">
+                <label>Model ID</label>
+                <input type="text" id="setting-model" placeholder="google/gemini-2.0-flash-001">
+            </div>
+
+            <div class="form-group">
+                <label id="key-label">API Key</label>
+                <input type="password" id="setting-api-key" placeholder="Enter API key...">
+            </div>
+
+            <div class="form-group">
+                <label>System Instructions (Optional)</label>
+                <textarea id="setting-system-prompt" rows="2" placeholder="You are a helpful AI assistant."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Close</button>
+                <button type="button" class="btn-save" onclick="saveSettings()">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         const chatBox = document.getElementById('chat');
         const form = document.getElementById('chat-form');
         const input = document.getElementById('user-input');
+        const modal = document.getElementById('settings-modal');
+        const activeModelPill = document.getElementById('active-model-pill');
+
+        const presets = {
+            openrouter: {
+                base_url: 'https://openrouter.ai/api/v1',
+                model: 'google/gemini-2.0-flash-001'
+            },
+            openai: {
+                base_url: 'https://api.openai.com/v1',
+                model: 'gpt-4o-mini'
+            },
+            groq: {
+                base_url: 'https://api.groq.com/openai/v1',
+                model: 'llama-3.3-70b-versatile'
+            },
+            custom: {
+                base_url: '',
+                model: ''
+            }
+        };
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; }
+
+        function applyPreset() {
+            const val = document.getElementById('preset-select').value;
+            if (presets[val]) {
+                if (presets[val].base_url) document.getElementById('setting-base-url').value = presets[val].base_url;
+                if (presets[val].model) document.getElementById('setting-model').value = presets[val].model;
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                document.getElementById('preset-select').value = data.provider || 'openrouter';
+                document.getElementById('setting-base-url').value = data.base_url || 'https://openrouter.ai/api/v1';
+                document.getElementById('setting-model').value = data.model || 'google/gemini-2.0-flash-001';
+                document.getElementById('setting-system-prompt').value = data.system_prompt || '';
+                activeModelPill.textContent = (data.provider || 'openrouter') + ': ' + (data.model || 'default');
+                if (data.has_api_key) {
+                    document.getElementById('setting-api-key').placeholder = 'API Key set (' + data.api_key_masked + ')';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function saveSettings() {
+            const provider = document.getElementById('preset-select').value;
+            const base_url = document.getElementById('setting-base-url').value;
+            const model = document.getElementById('setting-model').value;
+            const api_key = document.getElementById('setting-api-key').value;
+            const system_prompt = document.getElementById('setting-system-prompt').value;
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, base_url, model, api_key, system_prompt })
+                });
+                const result = await res.json();
+                closeModal();
+                loadSettings();
+                appendMessage('✅ Model settings updated to: ' + result.provider + ' (' + result.model + ')', 'bot');
+            } catch (err) {
+                alert('Failed to save settings: ' + err.message);
+            }
+        }
 
         function appendMessage(text, sender) {
             const msg = document.createElement('div');
@@ -171,9 +359,11 @@
                 const data = await res.json();
                 appendMessage(data.response || data.message || JSON.stringify(data), 'bot');
             } catch (err) {
-                appendMessage('Error communicating with model endpoint: ' + err.message, 'bot');
+                appendMessage('Error communicating with model: ' + err.message, 'bot');
             }
         });
+
+        loadSettings();
     </script>
 </body>
 </html>
