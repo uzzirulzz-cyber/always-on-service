@@ -1,0 +1,16 @@
+name: Keep Render Service Awake 24/7
+
+on:
+  schedule:
+    # Runs every 10 minutes automatically in GitHub's cloud
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          echo "Pinging https://always-on-service.onrender.com/health..."
+          curl -f -s -m 30 https://always-on-service.onrender.com/health || echo "Ping dispatched"
