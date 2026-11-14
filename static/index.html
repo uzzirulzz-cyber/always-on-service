@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI & Automation Model Interface</title>
+    <title>Universal AI Model Hub</title>
     <style>
         :root {
             --bg: #090d16;
-            --card-bg: #131c2e;
+            --sidebar-bg: #0f172a;
+            --card-bg: #1e293b;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --text: #f8fafc;
             --text-dim: #94a3b8;
-            --border: #23314d;
+            --border: #334155;
             --user-bubble: #2563eb;
-            --bot-bubble: #162035;
+            --bot-bubble: #1e293b;
+            --active-tab: #1d4ed8;
         }
         * { box-sizing: border-box; }
         body {
@@ -23,70 +25,122 @@
             background-color: var(--bg);
             color: var(--text);
             display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Sidebar */
+        aside {
+            width: 320px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+            overflow-y: auto;
+        }
+        aside h2 {
+            font-size: 1.05rem;
+            margin: 0 0 4px 0;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .provider-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .btn-provider {
+            background-color: #1e293b;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }
+        .btn-provider:hover, .btn-provider.active {
+            background-color: var(--active-tab);
+            border-color: #60a5fa;
+            font-weight: 600;
+        }
+        .config-box {
+            background: #111827;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .config-box label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        select, input[type="text"], input[type="password"] {
+            width: 100%;
+            background: #1f2937;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        select:focus, input:focus {
+            border-color: var(--primary);
+        }
+        .btn-save {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 9px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-save:hover { background-color: #059669; }
+
+        /* Main Chat Area */
+        main {
+            flex: 1;
+            display: flex;
             flex-direction: column;
             height: 100vh;
         }
         header {
             background-color: #0b1120;
-            padding: 12px 24px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        header h1 {
-            margin: 0;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .status-badge {
+        .badge-live {
             background-color: #10b981;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 8px #10b981;
+            box-shadow: 0 0 6px #10b981;
         }
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .btn-settings {
-            background-color: #1e293b;
-            color: #f8fafc;
-            border: 1px solid var(--border);
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .btn-settings:hover {
-            background-color: #334155;
-        }
-        .container {
+        .chat-container {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 850px;
-            width: 100%;
-            margin: 0 auto;
-            overflow: hidden;
-            padding: 16px;
-        }
-        .chat-box {
-            flex: 1;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding-right: 8px;
+            gap: 14px;
         }
         .message {
-            max-width: 82%;
+            max-width: 80%;
             padding: 12px 16px;
             border-radius: 12px;
             line-height: 1.5;
@@ -104,240 +158,228 @@
             background-color: var(--user-bubble);
             color: #fff;
         }
-        .input-bar {
+        .chat-input-bar {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
             display: flex;
-            gap: 10px;
-            padding-top: 14px;
+            gap: 12px;
+            background: #0b1120;
         }
-        input[type="text"], select, textarea {
-            padding: 12px 14px;
-            background-color: var(--card-bg);
+        .chat-input-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #1e293b;
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text);
-            font-size: 0.95rem;
+            color: #fff;
+            font-size: 1rem;
             outline: none;
-            width: 100%;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-        }
-        button.btn-send {
+        .chat-input-bar button {
             padding: 12px 24px;
-            background-color: var(--primary);
+            background: var(--primary);
             color: #fff;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        button.btn-send:hover {
-            background-color: var(--primary-hover);
-        }
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        .modal {
-            background: #111827;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            max-width: 520px;
-            width: 90%;
-            padding: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
-        }
-        .modal h2 {
-            margin-top: 0;
-            font-size: 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .form-group {
-            margin-bottom: 14px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-            margin-bottom: 6px;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .btn-cancel {
-            background: #374151;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .btn-save {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
+        .chat-input-bar button:hover {
+            background: var(--primary-hover);
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1><span class="status-badge"></span> Always-On Model Service</h1>
-        <div class="header-actions">
-            <span id="active-model-pill" style="font-size: 0.85rem; color: #38bdf8; background: #0c4a6e; padding: 4px 10px; border-radius: 12px;">Loading...</span>
-            <button class="btn-settings" onclick="openModal()">⚙️ Model Settings</button>
+    <aside>
+        <h2>⚡ Models & Inference</h2>
+        <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px;">Select provider:</div>
+        <div class="provider-grid">
+            <button class="btn-provider active" onclick="selectProvider('gemini')">✨ Gemini</button>
+            <button class="btn-provider" onclick="selectProvider('openai')">🤖 OpenAI</button>
+            <button class="btn-provider" onclick="selectProvider('claude')">🧠 Claude</button>
+            <button class="btn-provider" onclick="selectProvider('qwen')">🐉 Qwen</button>
+            <button class="btn-provider" onclick="selectProvider('kimi')">🌙 Kimi (Moonshot)</button>
+            <button class="btn-provider" onclick="selectProvider('glm')">⚡ GLM (Zhipu)</button>
+            <button class="btn-provider" onclick="selectProvider('deepseek')">🔍 DeepSeek</button>
+            <button class="btn-provider" onclick="selectProvider('openrouter')">🌐 OpenRouter (All)</button>
         </div>
-    </header>
 
-    <div class="container">
-        <div class="chat-box" id="chat">
-            <div class="message bot">👋 Hello! Your 24/7 inference service is running. Click <b>⚙️ Model Settings</b> at the top right to configure your provider (OpenRouter, OpenAI, Groq, Anthropic, or custom endpoints) and enter your API key.</div>
-        </div>
-
-        <form class="input-bar" id="chat-form">
-            <input type="text" id="user-input" placeholder="Type an instruction or prompt..." autocomplete="off" required>
-            <button type="submit" class="btn-send">Send</button>
-        </form>
-    </div>
-
-    <!-- Modal for Provider & Model Settings -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal">
-            <h2>⚙️ Inference Provider Configuration</h2>
-
-            <div class="form-group">
-                <label>Provider Preset</label>
-                <select id="preset-select" onchange="applyPreset()">
-                    <option value="openrouter">OpenRouter (Supports Gemini, Claude, Llama, DeepSeek, etc.)</option>
-                    <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
-                    <option value="groq">Groq (Ultra-fast Llama 3, Mixtral)</option>
-                    <option value="custom">Custom OpenAI-Compatible API</option>
-                </select>
+        <div class="config-box">
+            <div>
+                <label>Active Provider</label>
+                <div id="display-provider" style="font-weight:bold; color:#60a5fa; margin-top:2px;">Gemini (Google)</div>
             </div>
 
-            <div class="form-group">
-                <label>API Base URL</label>
-                <input type="text" id="setting-base-url" placeholder="https://openrouter.ai/api/v1">
+            <div>
+                <label>Model Preset</label>
+                <select id="select-model" onchange="updateModelInput()"></select>
             </div>
 
-            <div class="form-group">
-                <label>Model ID</label>
-                <input type="text" id="setting-model" placeholder="google/gemini-2.0-flash-001">
+            <div>
+                <label>Custom Model Name</label>
+                <input type="text" id="input-model" placeholder="Model ID...">
             </div>
 
-            <div class="form-group">
+            <div>
+                <label>API Endpoint (Base URL)</label>
+                <input type="text" id="input-base-url" placeholder="https://...">
+            </div>
+
+            <div>
                 <label id="key-label">API Key</label>
-                <input type="password" id="setting-api-key" placeholder="Enter API key...">
+                <input type="password" id="input-api-key" placeholder="Paste your API key here...">
+                <div id="key-status" style="font-size: 0.72rem; color: #10b981; margin-top: 3px;"></div>
             </div>
 
-            <div class="form-group">
-                <label>System Instructions (Optional)</label>
-                <textarea id="setting-system-prompt" rows="2" placeholder="You are a helpful AI assistant."></textarea>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModal()">Close</button>
-                <button type="button" class="btn-save" onclick="saveSettings()">Save & Apply</button>
-            </div>
+            <button class="btn-save" onclick="saveActiveSettings()">💾 Save & Activate Model</button>
         </div>
-    </div>
+    </aside>
+
+    <main>
+        <header>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge-live"></span>
+                <span style="font-weight:600; font-size:1.05rem;">Universal Inference Hub (24/7 Live)</span>
+            </div>
+            <div id="active-info-pill" style="font-size:0.85rem; color:#38bdf8; background:#0c4a6e; padding:4px 12px; border-radius:12px;">
+                Ready
+            </div>
+        </header>
+
+        <div class="chat-container" id="chat">
+            <div class="message bot">🚀 <b>Ready!</b> Select any model on the left (Gemini, Claude, OpenAI, Qwen, Kimi, GLM, DeepSeek, or OpenRouter), paste your API key, and hit <b>Save & Activate</b> to start chatting.</div>
+        </div>
+
+        <form class="chat-input-bar" id="chat-form">
+            <input type="text" id="user-input" placeholder="Message your model..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
+    </main>
 
     <script>
-        const chatBox = document.getElementById('chat');
-        const form = document.getElementById('chat-form');
-        const input = document.getElementById('user-input');
-        const modal = document.getElementById('settings-modal');
-        const activeModelPill = document.getElementById('active-model-pill');
-
-        const presets = {
-            openrouter: {
-                base_url: 'https://openrouter.ai/api/v1',
-                model: 'google/gemini-2.0-flash-001'
+        const providers = {
+            gemini: {
+                name: "Google Gemini",
+                base_url: "https://generativelanguage.googleapis.com/v1beta/openai/",
+                default_model: "gemini-2.0-flash",
+                models: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
             },
             openai: {
-                base_url: 'https://api.openai.com/v1',
-                model: 'gpt-4o-mini'
+                name: "OpenAI / Codex",
+                base_url: "https://api.openai.com/v1",
+                default_model: "gpt-4o",
+                models: ["gpt-4o", "gpt-4o-mini", "o1", "o3-mini"]
             },
-            groq: {
-                base_url: 'https://api.groq.com/openai/v1',
-                model: 'llama-3.3-70b-versatile'
+            claude: {
+                name: "Anthropic Claude (via OpenRouter/Proxy)",
+                base_url: "https://openrouter.ai/api/v1",
+                default_model: "anthropic/claude-3.5-sonnet",
+                models: ["anthropic/claude-3.5-sonnet", "anthropic/claude-3.5-haiku", "anthropic/claude-3-opus"]
             },
-            custom: {
-                base_url: '',
-                model: ''
+            qwen: {
+                name: "Qwen (Alibaba Cloud / DashScope)",
+                base_url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                default_model: "qwen-max",
+                models: ["qwen-max", "qwen-plus", "qwen-turbo", "qwen-2.5-coder-32b-instruct"]
+            },
+            kimi: {
+                name: "Kimi (Moonshot AI)",
+                base_url: "https://api.moonshot.cn/v1",
+                default_model: "moonshot-v1-8k",
+                models: ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"]
+            },
+            glm: {
+                name: "GLM (Zhipu AI)",
+                base_url: "https://open.bigmodel.cn/api/paas/v4/",
+                default_model: "glm-4-plus",
+                models: ["glm-4-plus", "glm-4-flash", "glm-4-air"]
+            },
+            deepseek: {
+                name: "DeepSeek",
+                base_url: "https://api.deepseek.com/v1",
+                default_model: "deepseek-chat",
+                models: ["deepseek-chat", "deepseek-reasoner"]
+            },
+            openrouter: {
+                name: "OpenRouter (All Providers)",
+                base_url: "https://openrouter.ai/api/v1",
+                default_model: "google/gemini-2.0-flash-001",
+                models: [
+                    "google/gemini-2.0-flash-001",
+                    "anthropic/claude-3.5-sonnet",
+                    "openai/gpt-4o",
+                    "qwen/qwen-2.5-coder-32b-instruct",
+                    "deepseek/deepseek-r1"
+                ]
             }
         };
 
-        function openModal() { modal.style.display = 'flex'; }
-        function closeModal() { modal.style.display = 'none'; }
+        let currentProvider = "gemini";
 
-        function applyPreset() {
-            const val = document.getElementById('preset-select').value;
-            if (presets[val]) {
-                if (presets[val].base_url) document.getElementById('setting-base-url').value = presets[val].base_url;
-                if (presets[val].model) document.getElementById('setting-model').value = presets[val].model;
-            }
+        function selectProvider(key) {
+            currentProvider = key;
+            document.querySelectorAll('.btn-provider').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const p = providers[key];
+            document.getElementById('display-provider').textContent = p.name;
+            document.getElementById('input-base-url').value = p.base_url;
+
+            const select = document.getElementById('select-model');
+            select.innerHTML = '';
+            p.models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                select.appendChild(opt);
+            });
+            document.getElementById('input-model').value = p.default_model;
         }
 
-        async function loadSettings() {
-            try {
-                const res = await fetch('/api/settings');
-                const data = await res.json();
-                document.getElementById('preset-select').value = data.provider || 'openrouter';
-                document.getElementById('setting-base-url').value = data.base_url || 'https://openrouter.ai/api/v1';
-                document.getElementById('setting-model').value = data.model || 'google/gemini-2.0-flash-001';
-                document.getElementById('setting-system-prompt').value = data.system_prompt || '';
-                activeModelPill.textContent = (data.provider || 'openrouter') + ': ' + (data.model || 'default');
-                if (data.has_api_key) {
-                    document.getElementById('setting-api-key').placeholder = 'API Key set (' + data.api_key_masked + ')';
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        function updateModelInput() {
+            document.getElementById('input-model').value = document.getElementById('select-model').value;
         }
 
-        async function saveSettings() {
-            const provider = document.getElementById('preset-select').value;
-            const base_url = document.getElementById('setting-base-url').value;
-            const model = document.getElementById('setting-model').value;
-            const api_key = document.getElementById('setting-api-key').value;
-            const system_prompt = document.getElementById('setting-system-prompt').value;
+        async function saveActiveSettings() {
+            const model = document.getElementById('input-model').value.trim();
+            const base_url = document.getElementById('input-base-url').value.trim();
+            const api_key = document.getElementById('input-api-key').value.trim();
+
+            if (!api_key) {
+                alert("Please paste your API key for " + providers[currentProvider].name);
+                return;
+            }
 
             try {
                 const res = await fetch('/api/settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ provider, base_url, model, api_key, system_prompt })
+                    body: JSON.stringify({
+                        provider: currentProvider,
+                        base_url: base_url,
+                        model: model,
+                        api_key: api_key
+                    })
                 });
-                const result = await res.json();
-                closeModal();
-                loadSettings();
-                appendMessage('✅ Model settings updated to: ' + result.provider + ' (' + result.model + ')', 'bot');
+                const data = await res.json();
+                document.getElementById('active-info-pill').textContent = "Active: " + currentProvider.toUpperCase() + " (" + model + ")";
+                document.getElementById('key-status').textContent = "✓ Key saved securely";
+                document.getElementById('input-api-key').value = '';
+                appendMessage(`✅ <b>${providers[currentProvider].name}</b> (${model}) is now activated and live! You can chat immediately below.`, 'bot');
             } catch (err) {
-                alert('Failed to save settings: ' + err.message);
+                alert("Error saving settings: " + err.message);
             }
         }
+
+        const chatBox = document.getElementById('chat');
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('user-input');
 
         function appendMessage(text, sender) {
             const msg = document.createElement('div');
             msg.className = `message ${sender}`;
-            msg.textContent = text;
+            msg.innerHTML = text;
             chatBox.appendChild(msg);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -359,11 +401,20 @@
                 const data = await res.json();
                 appendMessage(data.response || data.message || JSON.stringify(data), 'bot');
             } catch (err) {
-                appendMessage('Error communicating with model: ' + err.message, 'bot');
+                appendMessage('Error: ' + err.message, 'bot');
             }
         });
 
-        loadSettings();
+        // Initialize Gemini as default view
+        selectProvider('gemini');
+        fetch('/api/settings').then(r => r.json()).then(data => {
+            if (data.model) {
+                document.getElementById('active-info-pill').textContent = "Active: " + data.provider + " (" + data.model + ")";
+            }
+            if (data.has_api_key) {
+                document.getElementById('key-status').textContent = "✓ Key present (" + data.api_key_masked + ")";
+            }
+        });
     </script>
 </body>
 </html>
